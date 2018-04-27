@@ -1,4 +1,4 @@
-#include<connector.h>
+#include "connector.h";
 #include<time.h>
 #define PORT 34768
 unsigned int benchmark() {
@@ -26,7 +26,7 @@ int main() {
 		return 2;
 	}
 	while(1) {
-		printf("Waiting for job..."
+		printf("Waiting for job...");
 		char reply[512];
 		if(get_reply(reply,512) < 0) {
 			printf("FATAL: Did not recieve response from server\n");
@@ -36,8 +36,8 @@ int main() {
 		char result[4096];
 		char result_reply[4096];
 		time_t t0 = time(NULL);
-		crack(start,end,result,4096);
-		sprintf(result_reply,"1 %u %s",time(NULL) - t0,result);
+		//crack(start,end,result,4096);
+		sprintf(result_reply,"1 %ld %s",time(NULL) - t0,result);
 		send_bytes(result_reply,strlen(result_reply));
 	}
 }
