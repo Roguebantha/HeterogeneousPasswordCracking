@@ -1,12 +1,20 @@
-#include<connector.h>
+#include "connector.h"
 #include<time.h>
+
 #define PORT 34768
+const char filename[128] = "all_passwords.dict";
 unsigned int benchmark() {
 	return 1;
 }
 
-void crack(unsigned int start, unsigned int end, char* result,unsigned int result_length) {
-//TODO
+void crack(char* hash, unsigned int start, unsigned int end, char* result,unsigned int result_length) {
+	char command[256];
+	FILE *hashfile =  fopen("hashfile.hash","rw");
+	fputs(hash,hashfile);
+	fclose(hashfile);
+	sprintf(command,"tail -n %u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
+	system(command);
+	system("cat passwords.dict | hashcat64.bin hashfile.hash > output 2> output");
 }
 int main() {
 	char server_ip[16];
@@ -26,17 +34,26 @@ int main() {
 		return 2;
 	}
 	while(1) {
-		printf("Waiting for job..."
+		printf("Waiting for job...\n");
 		char reply[512];
 		if(get_reply(reply,512) < 0) {
 			printf("FATAL: Did not recieve response from server\n");
 			return 2;
 		}
 		//TODO parse reply
-		char result[4096];
-		char result_reply[4096];
 		time_t t0 = time(NULL);
 		crack(start,end,result,4096);
+
+		FILE *output = fopen("output", "rb");
+		fseek(output, 0, SEEK_END);
+		long output_size = ftell(output);
+		fseek(output, 0, SEEK_SET);  //same as rewind(f);
+		char *result = malloc(output_size + 1);
+		char *result_reply = malloc(output_size+30);
+		fread(result, output_size, 1, f);
+		fclose(output);
+		result[output_size] = 0;
+
 		sprintf(result_reply,"1 %u %s",time(NULL) - t0,result);
 		send_bytes(result_reply,strlen(result_reply));
 	}
