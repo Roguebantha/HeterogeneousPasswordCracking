@@ -7,7 +7,7 @@ unsigned int benchmark() {
 	return 1;
 }
 
-void crack(char* hash, unsigned int start, unsigned int end, char* result,unsigned int result_length) {
+void crack(char* hash, unsigned int start, unsigned int end,unsigned int result_length) {
 	char command[256];
 	FILE *hashfile =  fopen("hashfile.hash","rw");
 	fputs(hash,hashfile);
@@ -40,9 +40,10 @@ int main() {
 			printf("FATAL: Did not recieve response from server\n");
 			return 2;
 		}
+		int start = 0,end = 20;
 		//TODO parse reply
 		time_t t0 = time(NULL);
-		crack(start,end,result,4096);
+		crack(NULL,start,end,4096);
 
 		FILE *output = fopen("output", "rb");
 		fseek(output, 0, SEEK_END);
@@ -50,11 +51,11 @@ int main() {
 		fseek(output, 0, SEEK_SET);  //same as rewind(f);
 		char *result = malloc(output_size + 1);
 		char *result_reply = malloc(output_size+30);
-		fread(result, output_size, 1, f);
+		fread(result, output_size, 1, output);
 		fclose(output);
 		result[output_size] = 0;
 
-		sprintf(result_reply,"1 %u %s",time(NULL) - t0,result);
+		sprintf(result_reply,"1 %u %s",(unsigned int)(time(NULL) - t0),result);
 		send_bytes(result_reply,strlen(result_reply));
 	}
 }
