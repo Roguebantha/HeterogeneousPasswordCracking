@@ -3,32 +3,44 @@
 
 #define PORT 34768
 const char filename[128] = "all_passwords.dict";
+const char hash_filename[128] = "hashfile.hash";
+const unsigned int hash_type = 400;
 unsigned int benchmark() {
-	return 1;
+	system("cd ./hashcat-4.1.0/ && cat example.dict | ./hashcat64.bin -m400  example400.hash --speed-only --machine-readable --quiet -O | grep 1: | cut -d : -f2 >> ../benchmark_score");
+	unsigned int score;
+	FILE *benchmark = fopen("benchmark_score", "rb");
+	fscanf(benchmark,"%u",&score);
+	fclose(benchmark);
+	return score;
 }
 
-void crack(char* hash, unsigned int start, unsigned int end,unsigned int result_length) {
+void crack(char* hash, unsigned int start, unsigned int end) {
 	char command[256];
-	FILE *hashfile =  fopen("hashfile.hash","rw");
+	FILE *hashfile =  fopen(hash_filename,"rw");
 	fputs(hash,hashfile);
 	fclose(hashfile);
 	sprintf(command,"tail -n %u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
 	system(command);
-	system("cat passwords.dict | hashcat64.bin hashfile.hash > output 2> output");
+	sprintf(command,"cat passwords.dict | ./hashcat-4.1.0/hashcat64.bin -m %d --machine-readable --quiet -O %s > output 2> output",hash_type,hash_filename);
+	system(command);
 }
 int main() {
 	char server_ip[16];
 	printf("Enter server ip: ");
 	fgets(server_ip,16,stdin);
+	*strstr(server_ip,"\n") = 0;
 	char client_ip[16];
 	printf("Enter client ip: ");
 	fgets(client_ip,16,stdin);
+	printf("Benchmarking...\n");
+	unsigned int score = benchmark();
+	printf("Connecting...\n");
 	if(connect_to_server(PORT,client_ip)) {
 		printf("FATAL: Failed to connect to server\n");
 		return 1;
 	}
 	char init_connect[64];
-	sprintf(init_connect,"0 %s %u",client_ip,benchmark());
+	sprintf(init_connect,"0 %s %u",client_ip,score);
 	if(send_bytes(init_connect,strlen(init_connect)) < 0) {
 		printf("FATAL: Failed to send data to server\n");
 		return 2;
@@ -40,15 +52,16 @@ int main() {
 			printf("FATAL: Did not recieve response from server\n");
 			return 2;
 		}
+		if(strstr(reply,"exit")) return 0;
 		int start = 0,end = 20;
 		//TODO parse reply
 		time_t t0 = time(NULL);
-		crack(NULL,start,end,4096);
+		crack(NULL,start,end);
 
 		FILE *output = fopen("output", "rb");
 		fseek(output, 0, SEEK_END);
 		long output_size = ftell(output);
-		fseek(output, 0, SEEK_SET);  //same as rewind(f);
+		fseek(output, 0, SEEK_SET);
 		char *result = malloc(output_size + 1);
 		char *result_reply = malloc(output_size+30);
 		fread(result, output_size, 1, output);
