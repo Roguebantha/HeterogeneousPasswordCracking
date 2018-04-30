@@ -6,7 +6,7 @@ const char filename[128] = "all_passwords.dict";
 const char hash_filename[128] = "hashfile.hash";
 const unsigned int hash_type = 400;
 unsigned int benchmark() {
-	system("cd ./hashcat-4.1.0/ && cat example.dict | ./hashcat64.bin -m400  example400.hash --speed-only --machine-readable --quiet -O | grep 1: | cut -d : -f2 >> ../benchmark_score");
+	system("cd ./hashcat-4.1.0/ && cat example.dict | ./hashcat64.bin -m400  example400.hash --speed-only --machine-readable --quiet -O | grep 1: | cut -d : -f2 > ../benchmark_score");
 	unsigned int score;
 	FILE *benchmark = fopen("benchmark_score", "rb");
 	fscanf(benchmark,"%u",&score);
@@ -16,26 +16,30 @@ unsigned int benchmark() {
 
 void crack(char* hash, unsigned int start, unsigned int end) {
 	char command[256];
-	FILE *hashfile =  fopen(hash_filename,"rw");
+	FILE *hashfile =  fopen(hash_filename,"ab+");
 	fputs(hash,hashfile);
+	fputs("\n",hashfile);
 	fclose(hashfile);
-	sprintf(command,"tail -n %u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
+	sprintf(command,"tail -n +%u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
+	printf("%s\n",command);
 	system(command);
 	sprintf(command,"cat passwords.dict | ./hashcat-4.1.0/hashcat64.bin -m %d --machine-readable --quiet -O %s > output 2> output",hash_type,hash_filename);
+	printf("%s\n",command);
 	system(command);
 }
 int main() {
 	char server_ip[16];
+	char client_ip[16];
+	char hash[64] = "$H$9y5boZ2wsUlgl2tI6b5PrRoADzYfXD1";
 	printf("Enter server ip: ");
 	fgets(server_ip,16,stdin);
-	*strstr(server_ip,"\n") = 0;
-	char client_ip[16];
 	printf("Enter client ip: ");
 	fgets(client_ip,16,stdin);
+	*strstr(client_ip,"\n") = 0;
 	printf("Benchmarking...\n");
 	unsigned int score = benchmark();
 	printf("Connecting...\n");
-	if(connect_to_server(PORT,client_ip)) {
+	if(connect_to_server(PORT,server_ip)) {
 		printf("FATAL: Failed to connect to server\n");
 		return 1;
 	}
@@ -53,10 +57,10 @@ int main() {
 			return 2;
 		}
 		if(strstr(reply,"exit")) return 0;
-		int start = 0,end = 20;
+		int start = 0,end = 129987;
 		//TODO parse reply
 		time_t t0 = time(NULL);
-		crack(NULL,start,end);
+		crack(hash,start,end);
 
 		FILE *output = fopen("output", "rb");
 		fseek(output, 0, SEEK_END);
