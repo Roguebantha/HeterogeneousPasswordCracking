@@ -31,7 +31,7 @@ void crack(char* hash, unsigned int start, unsigned int end) {
 int main() {
 	char server_ip[16];
 	char client_ip[16];
-	char hash[64] = "$H$9y5boZ2wsUlgl2tI6b5PrRoADzYfXD1";
+	char hash[64];
 	printf("Enter server ip: ");
 	fgets(server_ip,16,stdin);
 	printf("Enter client ip: ");
