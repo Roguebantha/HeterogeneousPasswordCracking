@@ -1,0 +1,8 @@
+a.out
+hashcat*
+client
+benchmark_score
+all_passwords.dict
+hashfile.hash
+output
+passwords.dict

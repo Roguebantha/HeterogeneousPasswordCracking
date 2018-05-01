@@ -10,8 +10,8 @@
 #include<sys/socket.h>
 #include<arpa/inet.h>
 static int sock = -1;
-int send_bytes(char *data,unsigned int numBytes) {
-	return send(sock,data,numBytes,0);
+int send_bytes(char *data,unsigned int length) {
+	return send(sock,data,length,0);
 }
 int get_reply(char* reply,unsigned int reply_len) {
 	memset(reply,0,reply_len);
