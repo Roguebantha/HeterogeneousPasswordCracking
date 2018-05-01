@@ -58,7 +58,8 @@ int main() {
 			return 2;
 		}
 		if(strstr(reply,"exit")) return 0;
-		int start = 0,end = 129987;
+		int start, end;
+		sscanf(reply,"%s %u %u",hash,&start,&end);
 		//TODO parse reply
 		time_t t0 = time(NULL);
 		crack(hash,start,end);
