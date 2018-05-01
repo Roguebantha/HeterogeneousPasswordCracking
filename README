@@ -1,0 +1,10 @@
+=================Client=================
+Build:
+	make client
+That should build a working client no problem
+
+Run:
+	Just ./client will suffice. You'll need to enter a server ip and the client's ip
+	(although just a unique identifier would prolly be good enough) after that, the
+	client will benchmark and connect, and then simply wait for a job to come through.
+=======================================
