@@ -60,7 +60,6 @@ int main() {
 		if(strstr(reply,"exit")) return 0;
 		int start, end;
 		sscanf(reply,"%s %u %u",hash,&start,&end);
-		//TODO parse reply
 		time_t t0 = time(NULL);
 		crack(hash,start,end);
 
