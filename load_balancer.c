@@ -6,26 +6,24 @@
 #include <arpa/inet.h>
 #include <string.h>
 #define PORT 34768
-#define LINES_IN_FILE 76094863
+//#define LINES_IN_FILE 76094863
+#define LINES_IN_FILE 129988
 pthread_mutex_t lock;
+char hashed_password[1024];
 //The function for each thread to run
 void *connection_handler(void*);
 
-void parse_message(char[64], char[3][64]);
-
 int main()
 {
-  char password_hashed[100];
   int socket_desc, client_sock, c, i;
   struct sockaddr_in server, client;
-  char ip[16];
   int connections = 0;
   pthread_t thread_id[10];
 
   //Steps
   //Get the password from the user as an input
   printf("Please input the hashed password: ");
-  fgets(password_hashed,100,stdin);
+  fgets(hashed_password,1024,stdin);
 
   socket_desc = socket(AF_INET,SOCK_STREAM,0);
   if(socket_desc == -1)
@@ -82,32 +80,27 @@ void *connection_handler(void*socket_desc)
   int done = 0;
   int size, lines_to_send;
   int sock = *(int*)socket_desc;
-  char incoming_message[200];
-  char send_buffer[200];
+  char incoming_message[4096];
+  char send_buffer[2048];
+  char result[1024];
   char client_ip[40];
   int benchmark;
-  char temp_buckets[3][64];
+  int message_type;
+
   //get the first message with the benchmarks from the client
-  size = recv(sock,incoming_message, 200, 0);
-  incoming_message[size] = "\0";
+  size = recv(sock,incoming_message, 4096, 0);
   //previous_performance = benchmark
-  printf("Received: %s\n",incoming_message);
 
-  parse_message(incoming_message,temp_buckets);
-  //record the client ip
-  strcpy(client_ip,temp_buckets[1]);
-  benchmark = atoi(temp_buckets[0]);
-
+  sscanf(incoming_message,"%d %s %d",&message_type,client_ip,&benchmark);
   printf("Now we have benchmark: %d and ip %s\n",benchmark,client_ip);
-
   //while the line counter is less than the number of lines or done == false
   while(line_counter < LINES_IN_FILE && done == 0)
   {
     //select the number of lines to send (based on previous performance)
     lines_to_send = 200;//benchmark * 2000;
     //send the client the line counter and the number of lines
-    sprintf(send_buffer,"%d %d",line_counter,lines_to_send);
-    if(send(sock,send_buffer,strlen(send_buffer)) == -1)
+    sprintf(send_buffer,"%s %d %d",hashed_password,line_counter,line_counter + lines_to_send);
+    if(send(sock,send_buffer,strlen(send_buffer),0) == -1)
     {
       printf("Unable to send to client");
       return 1;
@@ -119,6 +112,13 @@ void *connection_handler(void*socket_desc)
 
     //spin around waiting for a reply from the client saying they are done or
     //have found the item
+    size = recv(sock,incoming_message,4096,0);
+    incoming_message[size] = "\0";
+    sscanf(incoming_message,"%d %d %s",&message_type,&benchmark,result);
+    printf("Got %s",incoming_message);
+
+    return 1;
+
 
     //Take the time they took to do it and compare with expected to get
     //previous_performance
@@ -126,24 +126,4 @@ void *connection_handler(void*socket_desc)
  //If we ever found the answer, print it out
 
   return 0;
-}
-
-void parse_message(char message[64], char result[3][64])
-{
-  int i, j;
-  int counter = 0;
-  j = 0;
-  for(i = 0; i < strlen(message); i++)
-  {
-    if(message[i] == ' ' || message[i] == '\0')
-    {
-      result[counter][j] = '\0';
-      counter ++;
-      j = 0;
-    }
-    else {
-      result[counter][j] = message[i];
-      j++;
-    }
-  }
 }

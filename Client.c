@@ -16,6 +16,7 @@ unsigned int benchmark() {
 
 void crack(char* hash, unsigned int start, unsigned int end) {
 	printf("Cracking...\n");
+	printf("Recieved: %u %u %s\n",start, end, hash);
 	char command[256];
 	sprintf(command,"rm -f %s",hash_filename);
 	system(command);
