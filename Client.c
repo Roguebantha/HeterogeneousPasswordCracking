@@ -1,4 +1,4 @@
-#include "connector.h";
+#include "connector.h"
 #include<time.h>
 
 #define PORT 34768
@@ -16,7 +16,6 @@ unsigned int benchmark() {
 
 void crack(char* hash, unsigned int start, unsigned int end) {
 	printf("Cracking...\n");
-	printf("Recieved: %u %u %s\n",start, end, hash);
 	char command[256];
 	sprintf(command,"rm -f %s",hash_filename);
 	system(command);
@@ -26,7 +25,7 @@ void crack(char* hash, unsigned int start, unsigned int end) {
 	fclose(hashfile);
 	sprintf(command,"tail -n +%u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
 	system(command);
-	sprintf(command,"cat passwords.dict | ./hashcat-4.1.0/hashcat64.bin -m %d --machine-readable --quiet -O --potfile-disable %s | grep : > output 2> output",hash_type,hash_filename);
+	sprintf(command,"cat passwords.dict | ./hashcat-4.1.0/hashcat64.bin -m %d --machine-readable --quiet -O --potfile-disable %s | grep : > output 2> output\n",hash_type,hash_filename);
 	system(command);
 }
 int main() {
@@ -52,7 +51,7 @@ int main() {
 		return 2;
 	}
 	while(1) {
-		printf("Waiting for job...");
+		printf("Waiting for job...\n");
 		char reply[512];
 		if(get_reply(reply,512) < 0) {
 			printf("FATAL: Did not recieve response from server\n");
@@ -63,7 +62,6 @@ int main() {
 		sscanf(reply,"%s %u %u",hash,&start,&end);
 		time_t t0 = time(NULL);
 		crack(hash,start,end);
-
 		FILE *output = fopen("output", "rb");
 		fseek(output, 0, SEEK_END);
 		unsigned int output_size = ftell(output);
