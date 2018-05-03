@@ -124,6 +124,7 @@ void *connection_handler(void*a)
   char send_buffer[2048];
   char result[1024];
   char client_ip[40];
+  int id = args->thread_id;
   int benchmark = args->benchmark;//This needs to be a local variable
   int message_type;
   char * password;
@@ -137,6 +138,7 @@ void *connection_handler(void*a)
     //send the client the line counter and the number of lines
     sprintf(send_buffer,"%s %d %d",hashed_password,line_counter,line_counter + lines_to_send);
 
+    printf("In the client (%d) sending %d,%d\n",id,line_counter,line_counter+lines_to_send);
     if(send(sock,send_buffer,strlen(send_buffer),0) == -1)
     {
       printf("Unable to send to client");
