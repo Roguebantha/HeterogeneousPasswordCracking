@@ -127,17 +127,16 @@ void *connection_handler(void*a)
   int benchmark = args->benchmark;//This needs to be a local variable
   int message_type;
   char * password;
-
-
-  //get the first message with the benchmarks from the client
+  lines_to_send = (int)((float)benchmark/(float)total_benchmark) * 10000;
 
   //while the line counter is less than the number of lines or done == false
   while(line_counter < LINES_IN_FILE)
   {
     //select the number of lines to send (based on previous performance)
-    lines_to_send = (int)((float)benchmark/(float)total_benchmark) * 100000;//benchmark * 2000;
+    //benchmark * 2000;
     //send the client the line counter and the number of lines
     sprintf(send_buffer,"%s %d %d",hashed_password,line_counter,line_counter + lines_to_send);
+
     if(send(sock,send_buffer,strlen(send_buffer),0) == -1)
     {
       printf("Unable to send to client");
