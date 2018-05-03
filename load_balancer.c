@@ -14,6 +14,8 @@ int total_benchmark = 0;
 //The function for each thread to run
 void *connection_handler(void*);
 
+int done = 0;
+
 int line_counter = 0;
 
 struct thread_send {
@@ -132,7 +134,7 @@ void *connection_handler(void*a)
   printf("client (%d), benchmark: %d out of %d\n, lines to send %d, line_counter %d\n",id,benchmark, total_benchmark,lines_to_send, line_counter);
 
   //while the line counter is less than the number of lines or done == false
-  while(line_counter < LINES_IN_FILE)
+  while(line_counter < LINES_IN_FILE && done == 0)
   {
     //select the number of lines to send (based on previous performance)
     //benchmark * 2000;
@@ -162,6 +164,7 @@ void *connection_handler(void*a)
     if((password = strstr(result,":")) != 0)
     {
       printf("Password found %s\n",++password);
+      done = 1;
       if(send(sock,"exit\0",5,0) == -1)
       {
         printf("Can't tell client to exit");
@@ -172,8 +175,7 @@ void *connection_handler(void*a)
 
   }
 
-  //Nothing was ever found
-  printf("No password found :( \n");
+
   if(send(sock,"exit\0",5,0) == -1)
   {
     printf("Can't tell client to exit");
