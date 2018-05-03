@@ -128,7 +128,7 @@ void *connection_handler(void*a)
   int benchmark = args->benchmark;//This needs to be a local variable
   int message_type;
   char * password;
-  lines_to_send = (int)((float)benchmark/(float)total_benchmark) * 10000;
+  lines_to_send = (int)(((float)benchmark/(float)total_benchmark) * 10000);
   printf("client (%d), benchmark: %d out of %d\n, lines to send %d, line_counter %d\n",id,benchmark, total_benchmark,lines_to_send, line_counter);
 
   //while the line counter is less than the number of lines or done == false
