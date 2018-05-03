@@ -57,7 +57,10 @@ int main() {
 			printf("FATAL: Did not recieve response from server\n");
 			return 2;
 		}
-		if(strstr(reply,"exit")) return 0;
+		if(strstr(reply,"exit")) {
+			printf("Recieved exit command, exitting...\n");
+			return 0;
+		}
 		int start, end;
 		sscanf(reply,"%s %u %u",hash,&start,&end);
 		time_t t0 = time(NULL);
