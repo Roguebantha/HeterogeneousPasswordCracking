@@ -53,7 +53,7 @@ int main() {
 	while(1) {
 		printf("Waiting for job...\n");
 		char reply[512];
-		if(get_reply(reply,512) < 0) {
+		if(get_reply(reply,512) <= 0) {
 			printf("FATAL: Did not recieve response from server\n");
 			return 2;
 		}
