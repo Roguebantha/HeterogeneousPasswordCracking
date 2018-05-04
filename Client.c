@@ -25,7 +25,7 @@ void crack(char* hash, unsigned int start, unsigned int end) {
 	fclose(hashfile);
 	sprintf(command,"tail -n +%u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
 	system(command);
-	sprintf(command,"./hashcat-4.1.0/hashcat64.bin -m %d  --machine-readable --quiet -O --potfile-disable %s passwords.dict | grep : > output 2> output\n",hash_type,hash_filename);
+	sprintf(command,"./hashcat-4.1.0/hashcat64.bin -m %d  --machine-readable --quiet -O --potfile-disable %s passwords.dict 2> /dev/null| grep : > output\n",hash_type,hash_filename);
 	system(command);
 }
 int main() {
@@ -59,6 +59,7 @@ int main() {
 		}
 		if(strstr(reply,"exit")) {
 			printf("Recieved exit command, exitting...\n");
+			close_connection();
 			return 0;
 		}
 		int start, end;
