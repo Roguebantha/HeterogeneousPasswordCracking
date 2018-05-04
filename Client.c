@@ -6,7 +6,7 @@ const char filename[128] = "all_passwords.dict";
 const char hash_filename[128] = "hashfile.hash";
 const unsigned int hash_type = 400;
 unsigned int benchmark() {
-	system("cd ./hashcat-4.1.0/ && cat example.dict | ./hashcat64.bin -m400  example400.hash --speed-only --machine-readable --quiet -O --potfile-disable | grep 1: | cut -d : -f2 > ../benchmark_score");
+	system("cd ./hashcat-4.1.0/ && ./hashcat64.bin -m400  example400.hash example.dict --speed-only --machine-readable --quiet -O --potfile-disable 2> /dev/null | grep : | head -n1 | cut -d : -f2 > ../benchmark_score");
 	unsigned int score;
 	FILE *benchmark = fopen("benchmark_score", "rb");
 	fscanf(benchmark,"%u",&score);
@@ -25,7 +25,7 @@ void crack(char* hash, unsigned int start, unsigned int end) {
 	fclose(hashfile);
 	sprintf(command,"tail -n +%u %s | head -n $((%u-%u+1)) > passwords.dict",start,filename,end,start);
 	system(command);
-	sprintf(command,"cat passwords.dict | ./hashcat-4.1.0/hashcat64.bin -m %d --machine-readable --quiet -O --potfile-disable %s | grep : > output 2> output\n",hash_type,hash_filename);
+	sprintf(command,"./hashcat-4.1.0/hashcat64.bin -m %d  --machine-readable --quiet -O --potfile-disable %s passwords.dict | grep : > output 2> output\n",hash_type,hash_filename);
 	system(command);
 }
 int main() {
