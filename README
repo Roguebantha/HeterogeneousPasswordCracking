@@ -8,3 +8,13 @@ Run:
 	(although just a unique identifier would prolly be good enough) after that, the
 	client will benchmark and connect, and then simply wait for a job to come through.
 =======================================
+
+=============Load Balancer=============
+Build:
+	make server
+	That should build the server
+Run:
+	Use ./load_balancer. When prompted, input the hashed password. Once the server
+	says it is starting, you can begin connecting the clients. After each client
+	connects, the load balancer will ask if there are more clients to connect. Once
+	all clients are connected, answer "N" and the password cracking will start.
